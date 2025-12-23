@@ -30,7 +30,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, setGameState,
   const spawnObstacle = () => {
     const types = ['ghost', 'invite', 'coach', 'toxic'];
     const type = types[Math.floor(Math.random() * types.length)];
-    const yPos = Math.random() * (CANVAS_HEIGHT - 150); // Air obstacles
+    
+    // Modified: Range extended to CANVAS_HEIGHT - 90 to allow obstacles near the ground.
+    // Ground is at HEIGHT - 50. Obstacle height is 40.
+    // So max Y = 600 - 50 - 40 = 510.
+    const yPos = Math.random() * (CANVAS_HEIGHT - 90);
+
     obstaclesRef.current.push({
       x: CANVAS_WIDTH + 50,
       y: yPos,

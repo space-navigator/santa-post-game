@@ -1,3 +1,4 @@
+
 export const CANVAS_WIDTH = 800;
 export const CANVAS_HEIGHT = 600;
 
@@ -26,7 +27,20 @@ export const LINKEDIN_POSTS = [
   "Liderzy nie jedzą. Liderzy karmią się sukcesem.",
   "Nie szukam pracy, ale chętnie porozmawiam o synergiach.",
   "Wstałem o 3:00, pobiegałem, napisałem książkę. A Ty?",
-  "Porażka to tylko feedback od wszechświata."
+  "Porażka to tylko feedback od wszechświata.",
+  // New batch
+  "Spotkałem bezdomnego. Dziś jest moim Senior Dev'em.",
+  "Zimny prysznic o 4:00 rano ustawił mi mindset na całą dekadę.",
+  "Zwolniłem 50 osób. To była najtrudniejsza lekcja empatii dla MNIE.",
+  "Nie zatrudniam ludzi z dyplomem. Zatrudniam wilki.",
+  "Oto 3 rzeczy, których nauczył mnie mój 2-letni syn o sprzedaży B2B.",
+  "ChatGPT napisał ten post, a ja właśnie skaluję biznes.",
+  "Praca w weekendy? To nie praca, to styl życia. #hustle",
+  "Szukamy Ninja, Rockstara, Jedi. Oferujemy owocowe czwartki.",
+  "Dziś kawa smakuje jak sukces. A jak Twoja?",
+  "Płakałem dziś na callu. Lider też człowiek. #vulnerability",
+  "Kryzys to po chińsku 'szansa' (tak myślę).",
+  "Nie sprzedawaj produktu. Sprzedawaj marzenia o produkcie."
 ];
 
 export const OBSTACLE_LABELS: Record<string, string> = {
