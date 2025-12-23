@@ -4,21 +4,252 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Posty od Świętego Mikołaja</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+      :root {
+        --bg-dark: #0f172a;
+        --bg-panel: #1e293b;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --red: #ef4444;
+        --red-dark: #7f1d1d;
+        --green: #4ade80;
+        --blue: #2563eb;
+        --blue-dark: #1e40af;
+        --slate-border: #475569;
+      }
+      
       body {
         margin: 0;
-        background-color: #0f172a;
-        overflow: hidden; /* Prevent scrolling */
-        touch-action: none; /* Disable double-tap zoom etc */
-        user-select: none; /* Disable text selection */
+        background-color: var(--bg-dark);
+        color: var(--text-main);
+        font-family: 'Courier New', Courier, monospace;
+        overflow: hidden;
+        user-select: none;
         -webkit-user-select: none;
+        touch-action: none;
       }
-      /* Ensure canvas looks crisp */
-      canvas {
-        image-rendering: pixelated; 
-        image-rendering: crisp-edges;
+
+      /* Layout */
+      .app {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 10px;
+        box-sizing: border-box;
       }
+
+      .title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: var(--red);
+        text-shadow: 3px 3px 0 #000;
+        text-align: center;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: -1px;
+      }
+      @media (min-width: 768px) { .title { font-size: 3rem; margin-bottom: 20px; } }
+
+      .game-wrapper { position: relative; }
+
+      /* Canvas */
+      .game-canvas {
+        border: 4px solid #334155;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        border-radius: 4px;
+        image-rendering: pixelated;
+        max-width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      /* HUD */
+      .hud {
+        position: absolute;
+        top: 10px; left: 10px; right: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        pointer-events: none;
+      }
+      .score-box {
+        background: rgba(15, 23, 42, 0.9);
+        border: 2px solid var(--slate-border);
+        padding: 8px 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        backdrop-filter: blur(4px);
+        font-size: 0.9rem;
+      }
+      @media (min-width: 768px) { .score-box { font-size: 1.2rem; } }
+      .score-val { color: var(--green); }
+
+      /* Feed (LinkedIn Posts) */
+      .feed { display: flex; flex-direction: column; gap: 8px; width: 180px; align-items: flex-end; }
+      @media (min-width: 768px) { .feed { width: 400px; gap: 12px; } }
+      
+      .post-card {
+        background: white;
+        color: #111;
+        border: 3px solid var(--blue);
+        padding: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s ease-out;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: left;
+      }
+      .post-card.faded { opacity: 0.8; transform: scale(0.95); display: none; }
+      @media (min-width: 768px) { .post-card.faded { display: block; } .post-card { padding: 16px; border-width: 4px; } }
+
+      .post-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+      .avatar { width: 20px; height: 20px; background: #ccc; border-radius: 50%; }
+      .post-meta { font-size: 10px; color: #666; font-weight: bold; line-height: 1; }
+      .post-meta span { color: #999; font-weight: normal; }
+      .post-text { font-size: 11px; font-weight: bold; line-height: 1.2; margin: 0; }
+      @media (min-width: 768px) { 
+        .post-text { font-size: 16px; } 
+        .avatar { width: 32px; height: 32px; }
+        .post-meta { font-size: 12px; }
+      }
+      .post-reactions { font-size: 10px; color: #555; margin-top: 4px; display: flex; justify-content: space-between; }
+
+      /* Overlays (Start/Game Over) */
+      .overlay {
+        position: fixed; inset: 0;
+        background: rgba(15, 23, 42, 0.96);
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        animation: fadeIn 0.3s;
+      }
+      .modal {
+        background: var(--bg-dark);
+        border: 4px solid white;
+        padding: 20px;
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      .modal.dashed { border-style: dashed; border-color: var(--red); }
+      
+      .modal-title { font-size: 1.5rem; color: var(--green); margin-bottom: 1rem; text-transform: uppercase; }
+      .modal-text { font-size: 1rem; line-height: 1.5; margin-bottom: 1.5rem; color: #cbd5e1; }
+      @media (min-width: 768px) { .modal-title { font-size: 2rem; } .modal-text { font-size: 1.2rem; } }
+
+      .result-box {
+        background: var(--bg-panel);
+        border: 1px solid var(--slate-border);
+        padding: 16px;
+        width: 100%;
+        margin-bottom: 20px;
+        box-sizing: border-box;
+      }
+      .result-score { font-size: 2.5rem; color: var(--green); font-weight: bold; }
+      @media (min-width: 768px) { .result-score { font-size: 4rem; } }
+
+      /* Buttons */
+      .btn {
+        display: inline-block;
+        padding: 15px 30px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        cursor: pointer;
+        color: white;
+        border: none;
+        border-bottom: 5px solid rgba(0,0,0,0.4);
+        transition: transform 0.1s;
+        margin-top: auto;
+        font-family: inherit;
+        width: 100%;
+      }
+      @media (min-width: 768px) { .btn { width: auto; font-size: 1.5rem; } }
+      .btn:active { transform: translateY(3px); border-bottom-width: 0; margin-bottom: 5px; }
+      
+      .btn-start { background: var(--red); border-color: var(--red-dark); animation: pulse 2s infinite; }
+      .btn-restart { background: var(--blue); border-color: var(--blue-dark); }
+
+      /* History List in Game Over */
+      .history-list { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-bottom: 20px; }
+      .history-item { 
+        background: white; color: #111; 
+        border-left: 6px solid var(--blue); 
+        padding: 10px; 
+        text-align: left;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      }
+      .history-text { font-weight: bold; font-style: italic; font-size: 0.9rem; margin: 4px 0; }
+      @media (min-width: 768px) { .history-text { font-size: 1rem; } }
+
+      /* Mobile Controls */
+      .controls-container {
+        width: 100%; max-width: 600px;
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        padding-bottom: 20px;
+      }
+      .d-pad {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        width: 130px;
+        height: 130px;
+        margin: 0 auto;
+      }
+      .control-btn {
+        background: #334155;
+        border: none;
+        border-bottom: 4px solid #0f172a;
+        border-radius: 4px;
+        color: white;
+        font-size: 1.5rem;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        touch-action: manipulation;
+      }
+      .control-btn:active { transform: translateY(2px); border-bottom-width: 0; background: #475569; }
+      .control-spacer { pointer-events: none; }
+      .control-center { background: #1e293b; border-radius: 50%; opacity: 0.5; }
+      
+      .action-btn {
+        background: var(--red);
+        border: none;
+        border-bottom: 8px solid var(--red-dark);
+        border-radius: 12px;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        width: 100%;
+        height: 100%;
+        min-height: 100px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+      }
+      .action-btn:active { transform: translateY(4px); border-bottom-width: 0; }
+      .action-icon { font-size: 2.5rem; display: block; margin-bottom: 5px; }
+
+      .footer { font-size: 10px; color: #64748b; margin-top: 10px; text-align: center; }
+
+      /* Animations */
+      @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+      @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
   <script type="importmap">
 {

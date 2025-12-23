@@ -331,8 +331,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, setGameState,
       ref={canvasRef} 
       width={CANVAS_WIDTH} 
       height={CANVAS_HEIGHT}
-      className="border-4 border-slate-700 shadow-2xl rounded-sm pixelated max-w-full h-auto"
-      style={{ imageRendering: 'pixelated' }}
+      className="game-canvas"
     />
   );
 };
