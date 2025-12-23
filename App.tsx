@@ -172,6 +172,8 @@ export default function App() {
 
       <div className="footer">
         Sterowanie: Strzałki (ruch) + Spacja (post) | Tapnij przyciski na ekranie.
+        <br />
+        Made by SpaceNavigator.io
       </div>
     </div>
   );
